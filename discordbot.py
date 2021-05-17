@@ -76,7 +76,6 @@ async def on_message(message):
     if message.author in muted_users:
         print(muted_users)
         await message.delete()
-    await bot.process_commands(message)
     message_content = message.content.lower()
     if message_content == "":
         return
@@ -98,6 +97,7 @@ async def on_message(message):
                 await user_strike_manager(message, users)
                 print("Bad Word " + bad_word + " " + str(message.author) + " said " + str(message.content))
                 return
+    await bot.process_commands(message)
 @bot.command()
 async def ping(ctx):
     await ctx.send("pong!")
