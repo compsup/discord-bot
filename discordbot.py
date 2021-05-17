@@ -54,11 +54,12 @@ async def user_strike_manager(message, users):
             await member.add_roles(role)
             muted_users.append(member)
             embed = discord.Embed(title=f"{member}", description=f"has been muted from text and voice for {time} seconds", color=0xFF5733)
-            await member.send(embed=embed)
             await message.channel.send(embed=embed)
             await asyncio.sleep(time)
             await member.remove_roles(role)
             muted_users.remove(member)
+            embed = discord.Embed(title=f"Unmuted", description=f"You have been unmuted in {message.guild}", color=0x258E70)
+            await member.send(embed=embed)
             users[user] = 0
 async def settings_manager(arg):
     global modules
@@ -144,8 +145,6 @@ async def purge(ctx, arg):
 @commands.has_any_role('Admin', 'Bot Builder')
 async def tempmute(ctx, member : discord.Member, time):
     '''
-    Usage: tempmute <user> <time in seconds>
-
     Tempmutes a user for the amount of time
     '''
     global muted_users
@@ -154,11 +153,29 @@ async def tempmute(ctx, member : discord.Member, time):
     if member not in muted_users:
         muted_users.append(member)
     embed = discord.Embed(title=f"{member}", description=f"has been muted from text and voice for {int(time)} seconds", color=0xFF5733)
-    await ctx.channel.send(embed=embed)
+    msg = await ctx.channel.send(embed=embed)
+    await msg.add_reaction("🇾")
+    await msg.add_reaction("🇪")
+    await msg.add_reaction("🇸")
     await asyncio.sleep(int(time))
     await member.remove_roles(muterole)
     muted_users.remove(member)
+@bot.command()
+@commands.has_any_role('Admin', 'Bot Builder')
+async def unmute(ctx, member : discord.Member):
+    '''
+    Unmutes a user
+    '''
+    global muted_users
 
+    muterole = discord.utils.get(member.guild.roles, name="BAD BAD")
+    if member in muted_users:
+        muted_users.remove(member)
+    await member.remove_roles(muterole)
+    embed = discord.Embed(title=f"Unmuted", description=f"You have been unmuted in {ctx.guild}", color=0x258E70)
+    await member.send(embed=embed)
+    embed = discord.Embed(title=f"{member}", description=f"has been unmuted.", color=0x258E70)
+    await ctx.channel.send(embed=embed)
 @bot.event
 async def on_command_error(ctx, error):
     '''
