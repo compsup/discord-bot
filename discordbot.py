@@ -12,7 +12,9 @@ modules["lol"] = True
 
 bad_words = []
 users = {}
-    
+
+# Compsup 2021
+
 with open('listfile.txt', 'r') as file:
     filecontents = file.readlines()
 
