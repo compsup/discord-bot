@@ -36,10 +36,7 @@ async def on_ready():
     print(bot.user.id)
     print('------')
     await bot.change_presence(status=discord.Status.online, activity=discord.Activity(type=discord.ActivityType.watching, name='Messages'))
-class User:
-  def __init__(self, name, strikes):
-    self.name = name
-    self.strikes = 0
+
 async def user_strike_manager(message, users):
     time = 600
     global muted_users
@@ -121,35 +118,23 @@ async def goodboy(ctx):
 @bot.command()
 @commands.has_any_role('Admin', 'Bot Builder')
 async def stop(ctx, arg):
+    arg = str(arg).lower()
     global modules
-    if str(arg) == "swear":
-        modules["swear"] = False
-        await ctx.send("Swear Module Stopped")
+    if arg in modules:
+        modules[arg] = False
+        await ctx.channel.send(f"{arg} has been stopped.")
         await settings_manager("save")
-    elif str(arg) == "lol":
-        modules["lol"] = False
-        await ctx.send("Lol Module Stopped")
-        await settings_manager("save")
-    elif str(arg) == "goodboy":
-        modules["goodboy"] = False
-        await ctx.send("Goodboy Module Stopped")
-        await settings_manager("save")
+
 @bot.command()
 @commands.has_any_role('Admin', 'Bot Builder')
 async def start(ctx, arg):
+    arg = str(arg).lower()
     global modules
-    if str(arg) == "swear":
-        modules["swear"] = True
-        await ctx.send("Swear Module Started")
+    if arg in modules:
+        modules[arg] = True
+        await ctx.channel.send(f"{arg} has been started.")
         await settings_manager("save")
-    elif str(arg) == "lol":
-        modules["lol"] = True
-        await ctx.send("Lol Module Started")
-        await settings_manager("save")
-    elif str(arg) == "goodboy":
-        modules["goodboy"] = True
-        await ctx.send("Goodboy Module Started")
-        await settings_manager("save")
+
 @bot.command()
 @commands.has_any_role('Admin', 'Bot Builder')
 async def purge(ctx, arg):
