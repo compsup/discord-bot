@@ -187,5 +187,6 @@ async def on_command_error(ctx, error):
         await ctx.send("You don't have the permissions to do that!")
     else:
         await ctx.send(error)
-
-bot.run('token')
+with open("token.txt", "r") as file:
+    token = file.read()
+bot.run(token)
