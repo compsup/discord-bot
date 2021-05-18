@@ -4,8 +4,6 @@ import asyncio
 import json
 global bad_words
 global modules
-global muted_users
-muted_users = []
 modules = {}
 modules["swear"] = True
 modules["lol"] = True
@@ -31,6 +29,7 @@ bot = commands.Bot(command_prefix='?', intent=intents)
 @bot.event
 async def on_ready():
     await settings_manager("load")
+
     print('Logged in as')
     print(bot.user.name)
     print(bot.user.id)
@@ -39,7 +38,6 @@ async def on_ready():
 
 async def user_strike_manager(message, users):
     time = 600
-    global muted_users
     user = message.author.id
     if user not in users:
         users[user] = 1
@@ -52,12 +50,10 @@ async def user_strike_manager(message, users):
             member = message.author
             role = discord.utils.get(member.guild.roles, name="BAD BAD")
             await member.add_roles(role)
-            muted_users.append(member)
             embed = discord.Embed(title=f"{member}", description=f"has been muted from text and voice for {time} seconds", color=0xFF5733)
             await message.channel.send(embed=embed)
             await asyncio.sleep(time)
             await member.remove_roles(role)
-            muted_users.remove(member)
             embed = discord.Embed(title=f"Unmuted", description=f"You have been unmuted in {message.guild}", color=0x258E70)
             await member.send(embed=embed)
             users[user] = 0
@@ -80,9 +76,10 @@ async def settings_manager(arg):
 
 @bot.event
 async def on_message(message):
-    if message.author in muted_users:
-        print(muted_users)
-        await message.delete()
+    if str(discord.utils.get(message.guild.roles, name="BAD BAD")) == "None":
+        server = message.guild
+        perms = discord.Permissions(send_messages=False, read_messages=True)
+        await server.create_role(name='BAD BAD', permissions=perms)
     message_content = message.content.lower()
     # Ignore empty messages like photos
     if message_content == "":
@@ -98,11 +95,11 @@ async def on_message(message):
         bot_builder = discord.utils.get(message.guild.roles, name="Bot Builder")
         # Exempt og_squad and bot builder
         if not og_squad in message.author.roles:
-            if not bot_builder in message.author.roles:
-                message_stripped = message_content.replace(" ", "")
+            if bot_builder in message.author.roles:
+                message_stripped = message_content.strip(" .,!*")
                 # loop through badword and check if any of the words appear in the message
                 for bad_word in bad_words:
-                    if str(message_stripped).find(bad_word) != -1:
+                    if bad_word in message_stripped:
                         await message.delete()
                         await user_strike_manager(message, users)
                         print("Bad Word " + bad_word + " " + str(message.author) + " said " + str(message.content))
@@ -147,11 +144,8 @@ async def tempmute(ctx, member : discord.Member, time):
     '''
     Tempmutes a user for the amount of time
     '''
-    global muted_users
     muterole = discord.utils.get(member.guild.roles, name="BAD BAD")
     await member.add_roles(muterole)
-    if member not in muted_users:
-        muted_users.append(member)
     embed = discord.Embed(title=f"{member}", description=f"has been muted from text and voice for {int(time)} seconds", color=0xFF5733)
     msg = await ctx.channel.send(embed=embed)
     await msg.add_reaction("🇾")
@@ -159,18 +153,13 @@ async def tempmute(ctx, member : discord.Member, time):
     await msg.add_reaction("🇸")
     await asyncio.sleep(int(time))
     await member.remove_roles(muterole)
-    muted_users.remove(member)
 @bot.command()
 @commands.has_any_role('Admin', 'Bot Builder')
 async def unmute(ctx, member : discord.Member):
     '''
     Unmutes a user
     '''
-    global muted_users
-
     muterole = discord.utils.get(member.guild.roles, name="BAD BAD")
-    if member in muted_users:
-        muted_users.remove(member)
     await member.remove_roles(muterole)
     embed = discord.Embed(title=f"Unmuted", description=f"You have been unmuted in {ctx.guild}", color=0x258E70)
     await member.send(embed=embed)
