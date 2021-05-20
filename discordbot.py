@@ -2,7 +2,8 @@ import discord
 from discord.ext import commands
 import asyncio
 import json
-global bad_words
+import re
+import logging
 global modules
 modules = {}
 modules["swear"] = True
@@ -10,9 +11,10 @@ modules["lol"] = True
 
 bad_words = []
 users = {}
-
 # Compsup 2021
-
+logging.basicConfig(filename="logfile.log", format='%(asctime)s %(message)s', filemode='a')
+logger=logging.getLogger()
+logger.setLevel(logging.DEBUG)
 # Retrive all the badwords
 with open('listfile.txt', 'r') as file:
     filecontents = file.readlines()
@@ -25,7 +27,9 @@ with open('listfile.txt', 'r') as file:
         bad_words.append(badword)
 
 intents = discord.Intents().all()
-bot = commands.Bot(command_prefix='?', intent=intents)
+intents.members = True
+intents.reactions = True
+bot = commands.Bot(command_prefix='?', intents=intents)
 @bot.event
 async def on_ready():
     await settings_manager("load")
@@ -35,18 +39,18 @@ async def on_ready():
     print(bot.user.id)
     print('------')
     await bot.change_presence(status=discord.Status.online, activity=discord.Activity(type=discord.ActivityType.watching, name='Messages'))
+    logger.debug("Ready!")
 
 async def user_strike_manager(message, users):
     time = 600
     user = message.author.id
     if user not in users:
         users[user] = 1
-        print("created " + str(user))
     else:
         users[user] += 1
-        print("added 1 to " + str(user))
         if users[user] >= 3:
-            print("User: " + str(message.author) + " has maxed there stikes!")
+            logger.debug("User: " + str(message.author) + " has been muted due to maxing strikes")
+            print("User: " + str(message.author) + " has maxed there strikes!")
             member = message.author
             role = discord.utils.get(member.guild.roles, name="BAD BAD")
             await member.add_roles(role)
@@ -57,9 +61,11 @@ async def user_strike_manager(message, users):
             embed = discord.Embed(title=f"Unmuted", description=f"You have been unmuted in {message.guild}", color=0x258E70)
             await member.send(embed=embed)
             users[user] = 0
+            logger.debug("User: " + str(message.author) + " has been unmuted.")
 async def settings_manager(arg):
     global modules
     if arg == "save":
+        logger.debug("Saving Settings")
         with open("settings.json", "w") as file:
             data = json.dumps(modules, indent=4)
             file.write(data)
@@ -69,17 +75,16 @@ async def settings_manager(arg):
             with open("settings.json", "r") as file:
                 data = file.read()
                 modules = json.loads(data)
+                logger.debug("Loaded Settings")
         except:
+            logger.warn("Reading failed, trying to create settings.json.")
             with open("settings.json", "w") as file:
                 data = json.dumps(modules, indent=4)
                 file.write(data)
+                logger.debug("Created settings.json and saved.")
 
 @bot.event
 async def on_message(message):
-    if str(discord.utils.get(message.guild.roles, name="BAD BAD")) == "None":
-        server = message.guild
-        perms = discord.Permissions(send_messages=False, read_messages=True)
-        await server.create_role(name='BAD BAD', permissions=perms)
     message_content = message.content.lower()
     # Ignore empty messages like photos
     if message_content == "":
@@ -87,27 +92,88 @@ async def on_message(message):
     if modules["lol"]:
         if message_content == "lol" and str(message.author.id) == "756569562677510175":
             await message.channel.send('All hail TurtleDude!')
+            logger.debug(f"Lol triggered")
     if message.author == bot.user:
         return
+    if str(message.channel.id) == "766025171038896128":
+        if message.content.isnumeric():
+            counting = {
+                "last_user": "",
+                "current_num": 0,
+            }
+            with open("counting.json", "r") as f:
+                try:
+                    counting = json.load(f)
+                except:
+                    with open("counting.json", "w") as f:
+                        json.dump(counting, f)
+            counting["current_num"] += 1
+            if str(message.content) == str(counting["current_num"]) and str(message.author) != counting["last_user"]:
+                await message.add_reaction("✅")
+                counting["last_user"] = str(message.author)
+                with open("counting.json", "w") as f:
+                    json.dump(counting, f)
+            elif str(message.author) == counting["last_user"]:
+                await message.add_reaction("❌")
+                await message.channel.send(f'{message.author.mention} counted twice!')
+                with open("counting.json", "w") as f:
+                    counting["current_num"] = 0
+                    counting["last_user"] = ""
+                    json.dump(counting, f)
+                    logger.debug("Counting reset to 0")
+            else:
+                await message.add_reaction("❌")
+                await message.channel.send(f'{message.author.mention} put in a wrong number! The next number was {counting["current_num"]}')
+                with open("counting.json", "w") as f:
+                    counting["current_num"] = 0
+                    counting["last_user"] = ""
+                    json.dump(counting, f)
+                    logger.debug("Counting reset to 0")
 
     if modules["swear"]:
-        og_squad = discord.utils.get(message.guild.roles, name="OG Squad")
+        logger.debug("Swear triggered")
+        Admin = discord.utils.get(message.guild.roles, name="Admin")
         bot_builder = discord.utils.get(message.guild.roles, name="Bot Builder")
         # Exempt og_squad and bot builder
-        if not og_squad in message.author.roles:
-            if bot_builder in message.author.roles:
-                message_stripped = message_content.strip(" .,!*")
+        if not Admin in message.author.roles:
+            if not bot_builder in message.author.roles:
                 # loop through badword and check if any of the words appear in the message
-                for bad_word in bad_words:
-                    if bad_word in message_stripped:
+                message_content = re.sub('[-?!*.,@#]', '', message_content)
+                message_content = message_content.split(" ")
+                for word in message_content:
+                    if word in bad_words:
                         await message.delete()
                         await user_strike_manager(message, users)
-                        print("Bad Word " + bad_word + " " + str(message.author) + " said " + str(message.content))
+                        print("Bad Word " + word + " " + str(message.author) + " said " + str(message.content))
+                        logger.debug("Bad Word " + word + " " + str(message.author) + " said " + str(message.content))
                         return
     await bot.process_commands(message)
+
 @bot.command()
 async def ping(ctx):
     await ctx.send("pong!")
+@bot.command()
+async def poll(ctx, seconds: int, *, question: str):
+    poll_upthumb = 0
+    poll_downthumb = 0
+    await ctx.message.delete()
+    embed = discord.Embed(title=f'Poll - {ctx.author}', description=f"{question}\n\n Yes/No({str(seconds)}seconds)", color=0xC9DEF2)
+    msg = await ctx.send(embed=embed)
+    messageid = msg.id
+    await msg.add_reaction('👍')
+    await msg.add_reaction('👎')
+    await asyncio.sleep(seconds)
+    message = await ctx.fetch_message(messageid)
+    for emoji in message.reactions:
+        if str(emoji) == "👍":
+            poll_upthumb = emoji.count
+        elif str(emoji) == "👎":
+            poll_downthumb = emoji.count
+    poll_upthumb -= 1
+    poll_downthumb -= 1
+    embed = discord.Embed(title=f'Poll Results', description=f"{question}\n\nYes: {poll_upthumb}\n No: {poll_downthumb}", color=0x002abf)
+    await ctx.send(embed=embed)
+
 @bot.command()
 async def goodboy(ctx):
     if modules["goodboy"]:
