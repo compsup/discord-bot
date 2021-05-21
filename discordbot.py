@@ -14,7 +14,7 @@ users = {}
 # Compsup 2021
 logging.basicConfig(filename="logfile.log", format='%(asctime)s %(message)s', filemode='a')
 logger=logging.getLogger()
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.WARN)
 # Retrive all the badwords
 with open('listfile.txt', 'r') as file:
     filecontents = file.readlines()
