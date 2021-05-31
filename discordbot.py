@@ -4,13 +4,19 @@ import asyncio
 import json
 import re
 import logging
+import leetspeak
+
 global modules
 modules = {}
 modules["swear"] = True
 modules["lol"] = True
+modules["leetspeak"] = True
 
 bad_words = []
 users = {}
+# get config for leetspeak
+leetspeakconfig_file = open("leetspeaksettings.json")
+leetspeakconfig = json.load(leetspeakconfig_file)
 # Compsup 2021
 logging.basicConfig(filename="logfile.log", format='%(asctime)s %(message)s', filemode='a')
 logger=logging.getLogger()
@@ -147,6 +153,20 @@ async def on_message(message):
                         print("Bad Word " + word + " " + str(message.author) + " said " + str(message.content))
                         logger.debug("Bad Word " + word + " " + str(message.author) + " said " + str(message.content))
                         return
+    if modules["leetspeak"]:
+        logger.debug("Leetspeak triggered")
+        if message.content.startswith("l/encode"):
+            #get part after l/encode
+            _,_,inp = message.content.partition(" ")
+            out = leetspeak.encode(inp, leetspeakconfig)
+            await message.channel.send(out)
+            return
+        elif message.content.startswith("l/decode"):
+            #get part after l/decode
+            _,_,inp = message.content.partition(" ")
+            out = leetspeak.decode(inp, leetspeakconfig)
+            await message.channel.send(out)
+            return
     await bot.process_commands(message)
 
 @bot.command()
