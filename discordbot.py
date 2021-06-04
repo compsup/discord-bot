@@ -4,6 +4,7 @@ import asyncio
 import json
 import re
 import logging
+from better_profanity import profanity
 global modules
 modules = {}
 modules["swear"] = True
@@ -138,15 +139,9 @@ async def on_message(message):
         if not Admin in message.author.roles:
             if not bot_builder in message.author.roles:
                 # loop through badword and check if any of the words appear in the message
-                message_content = re.sub('[-?!*.,@#]', '', message_content)
-                message_content = message_content.split(" ")
-                for word in message_content:
-                    if word in bad_words:
-                        await message.delete()
-                        await user_strike_manager(message, users)
-                        print("Bad Word " + word + " " + str(message.author) + " said " + str(message.content))
-                        logger.debug("Bad Word " + word + " " + str(message.author) + " said " + str(message.content))
-                        return
+                if profanity.contains_profanity(message_content):
+                    await message.delete()
+                    await user_strike_manager(message, users)
     await bot.process_commands(message)
 
 @bot.command()
