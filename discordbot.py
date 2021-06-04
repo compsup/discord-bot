@@ -153,6 +153,19 @@ async def on_message(message):
 async def ping(ctx):
     await ctx.send("pong!")
 @bot.command()
+async def pog(ctx):
+    not_pog = discord.utils.get(ctx.guild.roles, name="Not Poggers")
+    pog = discord.utils.get(ctx.guild.roles, name="POGGERS")
+    kinda_pog = discord.utils.get(ctx.guild.roles, name="Kinda Pog")
+    if pog in ctx.author.roles:
+        await ctx.send("Your very pog!")
+    elif not_pog in ctx.author.roles:
+        await ctx.send("Doesn't look like your very pog.")
+    elif kinda_pog in ctx.author.roles:
+        await ctx.send("Your kinda pog")
+    
+@bot.command()
+@commands.has_any_role('Admin', 'Bot Builder')
 async def poll(ctx, seconds: int, *, question: str):
     poll_upthumb = 0
     poll_downthumb = 0
