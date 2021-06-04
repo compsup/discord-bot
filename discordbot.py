@@ -4,6 +4,7 @@ import asyncio
 import json
 import re
 import logging
+from better_profanity import profanity
 global modules
 modules = {}
 modules["swear"] = True
@@ -17,14 +18,8 @@ logger=logging.getLogger()
 logger.setLevel(logging.WARN)
 # Retrive all the badwords
 with open('listfile.txt', 'r') as file:
-    filecontents = file.readlines()
-
-    for line in filecontents:
-        # remove linebreak which is the last character of the string
-        badword = line[:-1]
-
-        # add item to the list
-        bad_words.append(badword)
+    bad_words = file.readlines()
+profanity.load_censor_words(bad_words)
 
 intents = discord.Intents().all()
 intents.members = True
@@ -138,15 +133,9 @@ async def on_message(message):
         if not Admin in message.author.roles:
             if not bot_builder in message.author.roles:
                 # loop through badword and check if any of the words appear in the message
-                message_content = re.sub('[-?!*.,@#]', '', message_content)
-                message_content = message_content.split(" ")
-                for word in message_content:
-                    if word in bad_words:
-                        await message.delete()
-                        await user_strike_manager(message, users)
-                        print("Bad Word " + word + " " + str(message.author) + " said " + str(message.content))
-                        logger.debug("Bad Word " + word + " " + str(message.author) + " said " + str(message.content))
-                        return
+                if profanity.contains_profanity(message_content):
+                    await message.delete()
+                    await user_strike_manager(message, users)
     await bot.process_commands(message)
 
 @bot.command()
