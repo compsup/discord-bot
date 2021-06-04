@@ -18,14 +18,8 @@ logger=logging.getLogger()
 logger.setLevel(logging.WARN)
 # Retrive all the badwords
 with open('listfile.txt', 'r') as file:
-    filecontents = file.readlines()
-
-    for line in filecontents:
-        # remove linebreak which is the last character of the string
-        badword = line[:-1]
-
-        # add item to the list
-        bad_words.append(badword)
+    bad_words = file.readlines()
+profanity.load_censor_words(bad_words)
 
 intents = discord.Intents().all()
 intents.members = True
