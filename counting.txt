@@ -1,1 +1,0 @@
-{"last_user": "", "current_num": 0}
