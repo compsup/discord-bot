@@ -6,6 +6,7 @@ import re
 import logging
 global modules
 modules = {}
+modules["pog"] = True
 modules["swear"] = True
 modules["lol"] = True
 
@@ -153,6 +154,10 @@ async def on_message(message):
 async def ping(ctx):
     await ctx.send("pong!")
 @bot.command()
+async def pog(ctx):
+    if modules["pog"]:
+        await ctx.send("POGGERS!!!")
+@bot.command()
 async def poll(ctx, seconds: int, *, question: str):
     poll_upthumb = 0
     poll_downthumb = 0
@@ -218,10 +223,7 @@ async def tempmute(ctx, member : discord.Member, time):
     await msg.add_reaction("🇪")
     await msg.add_reaction("🇸")
     await asyncio.sleep(int(time))
-    await member.remove_roles(muterole)
-@bot.command()
-@commands.has_any_role('Admin', 'Bot Builder')
-async def unmute(ctx, member : discord.Member):
+    await member.remove_roles(muterole)"pog"
     '''
     Unmutes a user
     '''
