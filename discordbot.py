@@ -165,6 +165,7 @@ async def pog(ctx):
         await ctx.send("Your kinda pog")
     
 @bot.command()
+@commands.has_any_role('Admin', 'Bot Builder')
 async def poll(ctx, seconds: int, *, question: str):
     poll_upthumb = 0
     poll_downthumb = 0
