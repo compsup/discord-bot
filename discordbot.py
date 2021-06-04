@@ -88,9 +88,11 @@ async def on_message(message):
         if message_content == "lol" and str(message.author.id) == "756569562677510175":
             await message.channel.send('All hail TurtleDude!')
             logger.debug(f"Lol triggered")
+    # Don't trigger on the bots messages
     if message.author == bot.user:
         return
     if str(message.channel.id) == "766025171038896128":
+        # Check if the string is numeric
         if message.content.isnumeric():
             counting = {
                 "last_user": "",
@@ -132,7 +134,7 @@ async def on_message(message):
         # Exempt og_squad and bot builder
         if not Admin in message.author.roles:
             if not bot_builder in message.author.roles:
-                # loop through badword and check if any of the words appear in the message
+                # Uses Better Profanity to check if the string contains 1 or more bad words.
                 if profanity.contains_profanity(message_content):
                     await message.delete()
                     await user_strike_manager(message, users)
@@ -141,98 +143,108 @@ async def on_message(message):
 @bot.command()
 async def ping(ctx):
     await ctx.send("pong!")
-@bot.command()
-async def pog(ctx):
-    not_pog = discord.utils.get(ctx.guild.roles, name="Not Poggers")
-    pog = discord.utils.get(ctx.guild.roles, name="POGGERS")
-    kinda_pog = discord.utils.get(ctx.guild.roles, name="Kinda Pog")
-    if pog in ctx.author.roles:
-        await ctx.send("Your very pog!")
-    elif not_pog in ctx.author.roles:
-        await ctx.send("Doesn't look like your very pog.")
-    elif kinda_pog in ctx.author.roles:
-        await ctx.send("Your kinda pog")
-    
-@bot.command()
-@commands.has_any_role('Admin', 'Bot Builder')
-async def poll(ctx, seconds: int, *, question: str):
-    poll_upthumb = 0
-    poll_downthumb = 0
-    await ctx.message.delete()
-    embed = discord.Embed(title=f'Poll - {ctx.author}', description=f"{question}\n\n Yes/No({str(seconds)}seconds)", color=0xC9DEF2)
-    msg = await ctx.send(embed=embed)
-    messageid = msg.id
-    await msg.add_reaction('👍')
-    await msg.add_reaction('👎')
-    await asyncio.sleep(seconds)
-    message = await ctx.fetch_message(messageid)
-    for emoji in message.reactions:
-        if str(emoji) == "👍":
-            poll_upthumb = emoji.count
-        elif str(emoji) == "👎":
-            poll_downthumb = emoji.count
-    poll_upthumb -= 1
-    poll_downthumb -= 1
-    embed = discord.Embed(title=f'Poll Results', description=f"{question}\n\nYes: {poll_upthumb}\n No: {poll_downthumb}", color=0x002abf)
-    await ctx.send(embed=embed)
+class Moderation(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
 
-@bot.command()
-async def goodboy(ctx):
-    if modules["goodboy"]:
-        embed = discord.Embed(title="Woof", description="Thank you!", color=0xFF5733)
+    @commands.command()
+    @commands.has_any_role('Admin', 'Bot Builder')
+    async def purge(self, ctx, arg):
+        await ctx.channel.purge(limit=int(arg), bulk=True)
+
+    @commands.command()
+    @commands.has_any_role('Admin', 'Bot Builder')
+    async def tempmute(self, ctx, member : discord.Member, time):
+        '''
+        Tempmutes a user for the amount of time
+        '''
+        muterole = discord.utils.get(member.guild.roles, name="BAD BAD")
+        await member.add_roles(muterole)
+        embed = discord.Embed(title=f"{member}", description=f"has been muted from text and voice for {int(time)} seconds", color=0xFF5733)
+        msg = await ctx.channel.send(embed=embed)
+        await msg.add_reaction("🇾")
+        await msg.add_reaction("🇪")
+        await msg.add_reaction("🇸")
+        await asyncio.sleep(int(time))
+        await member.remove_roles(muterole)
+    @commands.command()
+    @commands.has_any_role('Admin', 'Bot Builder')
+    async def unmute(self, ctx, member : discord.Member):
+        '''
+        Unmutes a user
+        '''
+        muterole = discord.utils.get(member.guild.roles, name="BAD BAD")
+        await member.remove_roles(muterole)
+        embed = discord.Embed(title=f"Unmuted", description=f"You have been unmuted in {ctx.guild}", color=0x258E70)
+        await member.send(embed=embed)
+        embed = discord.Embed(title=f"{member}", description=f"has been unmuted.", color=0x258E70)
+        await ctx.channel.send(embed=embed)
+
+class Fun(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+    @commands.command()
+    async def pog(self, ctx):
+        not_pog = discord.utils.get(ctx.guild.roles, name="Not Poggers")
+        pog = discord.utils.get(ctx.guild.roles, name="POGGERS")
+        kinda_pog = discord.utils.get(ctx.guild.roles, name="Kinda Pog")
+        if pog in ctx.author.roles:
+            await ctx.send("Your very pog!")
+        elif not_pog in ctx.author.roles:
+            await ctx.send("Doesn't look like your very pog.")
+        elif kinda_pog in ctx.author.roles:
+            await ctx.send("Your kinda pog")
+
+    @commands.command()
+    async def goodboy(self, ctx):
+        if modules["goodboy"]:
+            embed = discord.Embed(title="Woof", description="Thank you!", color=0xFF5733)
+            await ctx.send(embed=embed)
+    @commands.command()
+    @commands.has_any_role('Admin', 'Bot Builder')
+    async def poll(self, ctx, seconds: int, *, question: str):
+        poll_upthumb = 0
+        poll_downthumb = 0
+        await ctx.message.delete()
+        embed = discord.Embed(title=f'Poll - {ctx.author}', description=f"{question}\n\n Yes/No({str(seconds)}seconds)", color=0xC9DEF2)
+        msg = await ctx.send(embed=embed)
+        messageid = msg.id
+        await msg.add_reaction('👍')
+        await msg.add_reaction('👎')
+        await asyncio.sleep(seconds)
+        message = await ctx.fetch_message(messageid)
+        for emoji in message.reactions:
+            if str(emoji) == "👍":
+                poll_upthumb = emoji.count
+            elif str(emoji) == "👎":
+                poll_downthumb = emoji.count
+        poll_upthumb -= 1
+        poll_downthumb -= 1
+        embed = discord.Embed(title=f'Poll Results', description=f"{question}\n\nYes: {poll_upthumb}\n No: {poll_downthumb}", color=0x002abf)
         await ctx.send(embed=embed)
-@bot.command()
-@commands.has_any_role('Admin', 'Bot Builder')
-async def stop(ctx, arg):
-    arg = str(arg).lower()
-    global modules
-    if arg in modules:
-        modules[arg] = False
-        await ctx.channel.send(f"{arg} has been stopped.")
-        await settings_manager("save")
+class Administrator(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
 
-@bot.command()
-@commands.has_any_role('Admin', 'Bot Builder')
-async def start(ctx, arg):
-    arg = str(arg).lower()
-    global modules
-    if arg in modules:
-        modules[arg] = True
-        await ctx.channel.send(f"{arg} has been started.")
-        await settings_manager("save")
+    @commands.command()
+    @commands.has_any_role('Admin', 'Bot Builder')
+    async def start(self, ctx, arg):
+        arg = str(arg).lower()
+        global modules
+        if arg in modules:
+            modules[arg] = True
+            await ctx.channel.send(f"{arg} has been started.")
+            await settings_manager("save")
+    @commands.command()
+    @commands.has_any_role('Admin', 'Bot Builder')
+    async def stop(self, ctx, arg):
+        arg = str(arg).lower()
+        global modules
+        if arg in modules:
+            modules[arg] = False
+            await ctx.channel.send(f"{arg} has been stopped.")
+            await settings_manager("save")
 
-@bot.command()
-@commands.has_any_role('Admin', 'Bot Builder')
-async def purge(ctx, arg):
-    await ctx.channel.purge(limit=int(arg), bulk=True)
-
-@bot.command()
-@commands.has_any_role('Admin', 'Bot Builder')
-async def tempmute(ctx, member : discord.Member, time):
-    '''
-    Tempmutes a user for the amount of time
-    '''
-    muterole = discord.utils.get(member.guild.roles, name="BAD BAD")
-    await member.add_roles(muterole)
-    embed = discord.Embed(title=f"{member}", description=f"has been muted from text and voice for {int(time)} seconds", color=0xFF5733)
-    msg = await ctx.channel.send(embed=embed)
-    await msg.add_reaction("🇾")
-    await msg.add_reaction("🇪")
-    await msg.add_reaction("🇸")
-    await asyncio.sleep(int(time))
-    await member.remove_roles(muterole)
-@bot.command()
-@commands.has_any_role('Admin', 'Bot Builder')
-async def unmute(ctx, member : discord.Member):
-    '''
-    Unmutes a user
-    '''
-    muterole = discord.utils.get(member.guild.roles, name="BAD BAD")
-    await member.remove_roles(muterole)
-    embed = discord.Embed(title=f"Unmuted", description=f"You have been unmuted in {ctx.guild}", color=0x258E70)
-    await member.send(embed=embed)
-    embed = discord.Embed(title=f"{member}", description=f"has been unmuted.", color=0x258E70)
-    await ctx.channel.send(embed=embed)
 @bot.event
 async def on_command_error(ctx, error):
     '''
@@ -248,4 +260,7 @@ async def on_command_error(ctx, error):
         await ctx.send(error)
 with open("token.txt", "r") as file:
     token = file.read()
+bot.add_cog(Moderation(bot))
+bot.add_cog(Fun(bot))
+bot.add_cog(Administrator(bot))
 bot.run(token)
