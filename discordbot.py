@@ -17,7 +17,7 @@ logging.basicConfig(filename="logfile.log", format='%(asctime)s %(message)s', fi
 logger=logging.getLogger()
 logger.setLevel(logging.WARN)
 # Retrive all the badwords
-with open('listfile.txt', 'r') as file:
+with open('swearwords.txt', 'r') as file:
     bad_words = file.readlines()
 profanity.load_censor_words(bad_words)
 
