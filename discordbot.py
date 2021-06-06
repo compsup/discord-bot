@@ -17,7 +17,7 @@ logging.basicConfig(filename="logfile.log", format='%(asctime)s %(message)s', fi
 logger=logging.getLogger()
 logger.setLevel(logging.WARN)
 # Retrive all the badwords
-with open('listfile.txt', 'r') as file:
+with open('swearwords.txt', 'r') as file:
     bad_words = file.readlines()
 profanity.load_censor_words(bad_words)
 
@@ -33,7 +33,7 @@ async def on_ready():
     print(bot.user.name)
     print(bot.user.id)
     print('------')
-    await bot.change_presence(status=discord.Status.online, activity=discord.Activity(type=discord.ActivityType.watching, name='Messages'))
+    # await bot.change_presence(status=discord.Status.online, activity=discord.Activity(type=discord.ActivityType.watching, name='Messages'))
     logger.debug("Ready!")
 
 async def user_strike_manager(message, users):
@@ -235,6 +235,12 @@ class Administrator(commands.Cog):
             modules[arg] = True
             await ctx.channel.send(f"{arg} has been started.")
             await settings_manager("save")
+    @commands.command()
+    @commands.has_any_role('Admin', 'Bot Builder')
+    async def addbadword(self, ctx, arg):
+        arg = str(arg).lower()
+        with open("swearwords.txt", "a") as file:
+            file.write("\n" + arg)
     @commands.command()
     @commands.has_any_role('Admin', 'Bot Builder')
     async def stop(self, ctx, arg):
