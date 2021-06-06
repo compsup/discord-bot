@@ -237,6 +237,12 @@ class Administrator(commands.Cog):
             await settings_manager("save")
     @commands.command()
     @commands.has_any_role('Admin', 'Bot Builder')
+    async def addbadword(self, ctx, arg):
+        arg = str(arg).lower()
+        with open("swearwords.txt", "a") as file:
+            file.write("\n" + arg)
+    @commands.command()
+    @commands.has_any_role('Admin', 'Bot Builder')
     async def stop(self, ctx, arg):
         arg = str(arg).lower()
         global modules
