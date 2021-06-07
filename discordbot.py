@@ -9,7 +9,7 @@ global modules
 modules = {}
 modules["swear"] = True
 modules["lol"] = True
-
+devmode = False
 bad_words = []
 users = {}
 # Compsup 2021
@@ -19,8 +19,6 @@ logger.setLevel(logging.WARN)
 # Retrive all the badwords
 profanity.load_censor_words_from_file("swearwords.txt")
 intents = discord.Intents().all()
-intents.members = True
-intents.reactions = True
 bot = commands.Bot(command_prefix='?', intents=intents)
 @bot.event
 async def on_ready():
@@ -82,7 +80,7 @@ async def on_message(message):
     if message_content == "":
         return
     if modules["lol"]:
-        if message_content == "lol" and str(message.author.id) == "756569562677510175":
+        if message_content == "lol" and str(message.author.id) == "756569562677510175" or devmode:
             await message.channel.send('All hail TurtleDude!')
             logger.debug(f"Lol triggered")
     # Don't trigger on the bots messages
@@ -129,14 +127,20 @@ async def on_message(message):
         Admin = discord.utils.get(message.guild.roles, name="Admin")
         bot_builder = discord.utils.get(message.guild.roles, name="Bot Builder")
         # Exempt og_squad and bot builder
-        if not Admin in message.author.roles:
-            if not bot_builder in message.author.roles:
+        if not Admin in message.author.roles or devmode:
+            if not bot_builder in message.author.roles or devmode:
                 # Uses Better Profanity to check if the string contains 1 or more bad words.
                 if profanity.contains_profanity(message_content):
                     await message.delete()
                     await user_strike_manager(message, users)
     await bot.process_commands(message)
-
+@bot.event
+async def on_member_update(before, after):
+    if before.nick != after.nick:
+        guild = bot.get_guild(744594255456239636)
+        member = guild.get_member(after.id)
+        if profanity.contains_profanity(after.nick):
+            await member.edit(nick="Moderator Changed")
 @bot.command()
 async def ping(ctx):
     await ctx.send("pong!")
@@ -234,10 +238,27 @@ class Administrator(commands.Cog):
             await settings_manager("save")
     @commands.command()
     @commands.has_any_role('Admin', 'Bot Builder')
+    async def devmode(self, ctx):
+        '''
+        Enables devmod
+
+        Devmode makes it so all features work on everyone.
+        '''
+        global devmode
+        if devmode:
+            devmode = False
+            await ctx.channel.send("Dev mode: Disabled")
+        else:
+            devmode = True
+            await ctx.channel.send("Dev mode: Enabled")
+    @commands.command()
+    @commands.has_any_role('Admin', 'Bot Builder')
     async def addbadword(self, ctx, arg):
         arg = str(arg).lower()
         with open("swearwords.txt", "a") as file:
             file.write("\n" + arg)
+        profanity.load_censor_words_from_file("swearwords.txt")
+        await ctx.message.delete()
     @commands.command()
     @commands.has_any_role('Admin', 'Bot Builder')
     async def stop(self, ctx, arg):
