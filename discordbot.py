@@ -17,10 +17,7 @@ logging.basicConfig(filename="logfile.log", format='%(asctime)s %(message)s', fi
 logger=logging.getLogger()
 logger.setLevel(logging.WARN)
 # Retrive all the badwords
-with open('swearwords.txt', 'r') as file:
-    bad_words = file.readlines()
-profanity.load_censor_words(bad_words)
-
+profanity.load_censor_words_from_file("swearwords.txt")
 intents = discord.Intents().all()
 intents.members = True
 intents.reactions = True
