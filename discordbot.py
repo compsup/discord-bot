@@ -148,13 +148,13 @@ async def roles(ctx):
     embed=discord.Embed(title="Reaction Roles", description="React with the corresponding emoji to get the role", color=0xff0000)
     embed.add_field(name="🎉", value="LETS PARTY", inline=True)
     embed.add_field(name="⛏️", value="MC Party", inline=True)
-    embed.add_field(name="🔪", value="Among Us Party", inline=True)
+    embed.add_field(name="<:AmongUsRed:842015690348036128>", value="Among Us Party", inline=True)
     embed.add_field(name="👻", value="Phasmophobia Party", inline=True)
     embed.set_footer(text="Made by @compsup")
     msg = await ctx.send(embed=embed)
     await msg.add_reaction('🎉')
     await msg.add_reaction('⛏️')
-    await msg.add_reaction('🔪')
+    await msg.add_reaction('<:AmongUsRed:842015690348036128>')
     await msg.add_reaction('👻')
 @bot.event
 async def on_raw_reaction_add(payload):
@@ -172,7 +172,7 @@ async def on_raw_reaction_add(payload):
         elif emoji == '⛏️':
             mrole = discord.utils.get(guild.roles, name='MC Party')
             await member.add_roles(mrole)
-        elif emoji == '🔪':
+        elif emoji == '<:AmongUsRed:842015690348036128>':
             mrole = discord.utils.get(guild.roles, name='Among Us Party')
             await member.add_roles(mrole)
         elif emoji == '👻':
@@ -193,7 +193,7 @@ async def on_raw_reaction_remove(payload):
         elif emoji == '⛏️':
             mrole = discord.utils.get(guild.roles, name='MC Party')
             await member.remove_roles(mrole)
-        elif emoji == '🔪':
+        elif emoji == '<:AmongUsRed:842015690348036128>':
             mrole = discord.utils.get(guild.roles, name='Among Us Party')
             await member.remove_roles(mrole)
         elif emoji == '👻':
