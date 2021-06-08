@@ -5,6 +5,7 @@ import json
 import re
 import logging
 from better_profanity import profanity
+import datetime
 global modules
 modules = {}
 modules["swear"] = True
@@ -29,7 +30,7 @@ async def on_ready():
     print(bot.user.id)
     print('------')
     # await bot.change_presence(status=discord.Status.online, activity=discord.Activity(type=discord.ActivityType.watching, name='Messages'))
-    logger.debug("Ready!")
+    logger.info("Ready!")
 
 async def user_strike_manager(message, users):
     time = 600
@@ -141,6 +142,64 @@ async def on_member_update(before, after):
         member = guild.get_member(after.id)
         if profanity.contains_profanity(after.nick):
             await member.edit(nick="Moderator Changed")
+            await member.send("You username contains profanity and has been changed!")
+            logger.debug(f"{member.name} made there nickname a bad word and has been changed.")
+async def roles(ctx):
+    embed=discord.Embed(title="Reaction Roles", description="React with the corresponding emoji to get the role", color=0xff0000)
+    embed.add_field(name="🎉", value="LETS PARTY", inline=True)
+    embed.add_field(name="⛏️", value="MC Party", inline=True)
+    embed.add_field(name="🔪", value="Among Us Party", inline=True)
+    embed.add_field(name="👻", value="Phasmophobia Party", inline=True)
+    embed.set_footer(text="Made by @compsup")
+    msg = await ctx.send(embed=embed)
+    await msg.add_reaction('🎉')
+    await msg.add_reaction('⛏️')
+    await msg.add_reaction('🔪')
+    await msg.add_reaction('👻')
+@bot.event
+async def on_raw_reaction_add(payload):
+    if not payload.guild_id:
+        return
+    ourMessageID = 851573676046155787
+
+    if ourMessageID == payload.message_id:
+        member = payload.member
+        guild = member.guild
+        emoji = payload.emoji.name
+        if emoji == '🎉':
+            mrole = discord.utils.get(guild.roles, name='LETS PARTY')
+            await member.add_roles(mrole)
+        elif emoji == '⛏️':
+            mrole = discord.utils.get(guild.roles, name='MC Party')
+            await member.add_roles(mrole)
+        elif emoji == '🔪':
+            mrole = discord.utils.get(guild.roles, name='Among Us Party')
+            await member.add_roles(mrole)
+        elif emoji == '👻':
+            mrole = discord.utils.get(guild.roles, name='Phasmophobia Party')
+            await member.add_roles(mrole)
+@bot.event
+async def on_raw_reaction_remove(payload):
+    if not payload.guild_id:
+        return
+    ourMessageID = 851573676046155787
+    if ourMessageID == payload.message_id:
+        guild = bot.get_guild(payload.guild_id)
+        member = guild.get_member(payload.user_id)
+        emoji = payload.emoji.name
+        if emoji == '🎉':
+            mrole = discord.utils.get(guild.roles, name='LETS PARTY')
+            await member.remove_roles(mrole)
+        elif emoji == '⛏️':
+            mrole = discord.utils.get(guild.roles, name='MC Party')
+            await member.remove_roles(mrole)
+        elif emoji == '🔪':
+            mrole = discord.utils.get(guild.roles, name='Among Us Party')
+            await member.remove_roles(mrole)
+        elif emoji == '👻':
+            mrole = discord.utils.get(guild.roles, name='Phasmophobia Party')
+            await member.remove_roles(mrole)
+    
 @bot.command()
 async def ping(ctx):
     await ctx.send("pong!")
@@ -238,6 +297,10 @@ class Administrator(commands.Cog):
             await settings_manager("save")
     @commands.command()
     @commands.has_any_role('Admin', 'Bot Builder')
+    async def createreactionroles(self, ctx):
+        await roles(ctx)
+    @commands.command()
+    @commands.has_any_role('Admin', 'Bot Builder')
     async def devmode(self, ctx):
         '''
         Enables devmod
@@ -246,9 +309,13 @@ class Administrator(commands.Cog):
         '''
         global devmode
         if devmode:
+            logger.debug(f'Dev mode has been disabled by: {ctx.author}')
+            print(f'Dev mode has been disabled by: {ctx.author}')
             devmode = False
             await ctx.channel.send("Dev mode: Disabled")
         else:
+            logger.debug(f'Dev mode has been enabled by: {ctx.author}')
+            print(f'Dev mode has been enabled by: {ctx.author}')
             devmode = True
             await ctx.channel.send("Dev mode: Enabled")
     @commands.command()
@@ -281,7 +348,7 @@ async def on_command_error(ctx, error):
     elif isinstance(error, discord.Forbidden):
         await ctx.send("You don't have the permissions to do that!")
     else:
-        await ctx.send(error)
+        await logger.error(error)
 with open("token.txt", "r") as file:
     token = file.read()
 bot.add_cog(Moderation(bot))
