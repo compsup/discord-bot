@@ -172,7 +172,7 @@ async def on_raw_reaction_add(payload):
         elif emoji == '⛏️':
             mrole = discord.utils.get(guild.roles, name='MC Party')
             await member.add_roles(mrole)
-        elif emoji == '<:AmongUsRed:842015690348036128>':
+        elif emoji == 'AmongUsRed':
             mrole = discord.utils.get(guild.roles, name='Among Us Party')
             await member.add_roles(mrole)
         elif emoji == '👻':
@@ -193,7 +193,7 @@ async def on_raw_reaction_remove(payload):
         elif emoji == '⛏️':
             mrole = discord.utils.get(guild.roles, name='MC Party')
             await member.remove_roles(mrole)
-        elif emoji == '<:AmongUsRed:842015690348036128>':
+        elif emoji == 'AmongUsRed':
             mrole = discord.utils.get(guild.roles, name='Among Us Party')
             await member.remove_roles(mrole)
         elif emoji == '👻':
