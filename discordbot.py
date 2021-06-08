@@ -77,6 +77,7 @@ async def settings_manager(arg):
 @bot.event
 async def on_message(message):
     message_content = message.content.lower()
+    message_content = message_content.replace("*", "")
     # Ignore empty messages like photos
     if message_content == "":
         return
@@ -207,6 +208,10 @@ class Moderation(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    @commands.command()
+    @commands.has_any_role('Admin', 'Bot Builder')
+    async def editnick(self, ctx, user : discord.Member, newnick):
+        await user.edit(nick=str(newnick))
     @commands.command()
     @commands.has_any_role('Admin', 'Bot Builder')
     async def purge(self, ctx, arg):
