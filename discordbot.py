@@ -348,7 +348,7 @@ async def on_command_error(ctx, error):
     elif isinstance(error, discord.Forbidden):
         await ctx.send("You don't have the permissions to do that!")
     else:
-        await logger.error(error)
+        logger.error(error)
 with open("token.txt", "r") as file:
     token = file.read()
 bot.add_cog(Moderation(bot))
