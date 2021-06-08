@@ -160,7 +160,7 @@ async def roles(ctx):
 async def on_raw_reaction_add(payload):
     if not payload.guild_id:
         return
-    ourMessageID = 851573676046155787
+    ourMessageID = 851821305605914704
 
     if ourMessageID == payload.message_id:
         member = payload.member
@@ -182,7 +182,7 @@ async def on_raw_reaction_add(payload):
 async def on_raw_reaction_remove(payload):
     if not payload.guild_id:
         return
-    ourMessageID = 851573676046155787
+    ourMessageID = 851821305605914704
     if ourMessageID == payload.message_id:
         guild = bot.get_guild(payload.guild_id)
         member = guild.get_member(payload.user_id)
