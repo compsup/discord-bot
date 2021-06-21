@@ -136,38 +136,7 @@ async def on_message(message):
                     await message.delete()
                     await user_strike_manager(message, users)
     await bot.process_commands(message)
-    await anti_spam(message)
 
-async def anti_spam(message):
-    member = str(message.author)
-    userlist = {}
-    try:
-        with open("anti-spam.json", "r") as f:
-            userlist = json.load(f)
-    except:
-        with open("anti-spam.json", "w") as f:
-            f.write(json.dumps(userlist, indent = 4))
-    if member in userlist:
-        userlist[member] += 1
-        with open("anti-spam.json", "w") as f:
-            f.write(json.dumps(userlist, indent = 4))
-        await asyncio.sleep(5)
-        with open("anti-spam.json", "r") as f:
-            userlist = json.load(f)
-        if userlist[member] >= 4:
-            print(f"{member} is spamming!")
-            userlist[member] = 0
-            with open("anti-spam.json", "w") as f:
-                f.write(json.dumps(userlist, indent = 4))
-            await user_strike_manager(message, users)
-        else:
-            userlist[member] = 0
-            with open("anti-spam.json", "w") as f:
-                f.write(json.dumps(userlist, indent = 4))
-    else:
-        userlist[member] = 1
-        with open("anti-spam.json", "w") as f:
-            f.write(json.dumps(userlist, indent = 4))
 @bot.event
 async def on_member_update(before, after):
     if before.nick != after.nick:
