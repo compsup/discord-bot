@@ -73,22 +73,8 @@ async def settings_manager(arg):
                 data = json.dumps(modules, indent=4)
                 file.write(data)
                 logger.debug("Created settings.json and saved.")
-
-@bot.event
-async def on_message(message):
-    message_content = message.content.lower()
-    message_content = message_content.replace("*", "")
-    # Ignore empty messages like photos
-    if message_content == "":
-        return
-    if modules["lol"]:
-        if message_content == "lol" and str(message.author.id) == "756569562677510175" or devmode:
-            await message.channel.send('All hail TurtleDude!')
-            logger.debug(f"Lol triggered")
-    # Don't trigger on the bots messages
-    if message.author == bot.user:
-        return
-    if str(message.channel.id) == "766025171038896128":
+async def counting(message):
+     if str(message.channel.id) == "766025171038896128":
         # Check if the string is numeric
         if message.content.isnumeric():
             counting = {
@@ -123,6 +109,20 @@ async def on_message(message):
                     counting["last_user"] = ""
                     json.dump(counting, f)
                     logger.debug("Counting reset to 0")
+@bot.event
+async def on_message(message):
+    message_content = message.content.lower()
+    message_content = message_content.replace("*", "")
+    # Ignore empty messages like photos
+    if message_content == "":
+        return
+    if modules["lol"]:
+        if message_content == "lol" and str(message.author.id) == "756569562677510175" or devmode:
+            await message.channel.send('All hail TurtleDude!')
+            logger.debug(f"Lol triggered")
+    # Don't trigger on the bots messages
+    if message.author == bot.user:
+        return
 
     if modules["swear"]:
         logger.debug("Swear triggered")
@@ -135,6 +135,7 @@ async def on_message(message):
                 if profanity.contains_profanity(message_content):
                     await message.delete()
                     await user_strike_manager(message, users)
+    await counting(message)
     await bot.process_commands(message)
 
 @bot.event
