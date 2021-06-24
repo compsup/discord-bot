@@ -305,6 +305,13 @@ class Administrator(commands.Cog):
             await ctx.channel.send(f"{arg} has been started.")
             await settings_manager("save")
     @commands.command()
+    async def strikes(self, ctx):
+        user = ctx.author.id
+        if user in users:
+            await ctx.channel.send("You have " + str(users[user]) + " strikes.")
+        else:
+            await ctx.channel.send("You don't have any strikes!")
+    @commands.command()
     @commands.has_any_role('Admin', 'Bot Builder')
     async def createreactionroles(self, ctx):
         await roles(ctx)
