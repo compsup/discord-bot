@@ -75,3 +75,26 @@
 2021-06-24 10:46:21,816 PyNaCl is not installed, voice will NOT be supported
 2021-06-24 10:47:08,505 PyNaCl is not installed, voice will NOT be supported
 2021-06-24 10:47:25,055 PyNaCl is not installed, voice will NOT be supported
+2021-06-24 11:05:10,068 PyNaCl is not installed, voice will NOT be supported
+2021-06-24 11:05:42,177 Converting to "int" failed for parameter "num".
+2021-06-24 11:06:26,025 Role 'Bot Builder' is required to run this command.
+2021-06-24 11:06:59,747 PyNaCl is not installed, voice will NOT be supported
+2021-06-24 11:07:10,936 Command raised an exception: NameError: name 'users' is not defined
+2021-06-24 11:07:38,001 PyNaCl is not installed, voice will NOT be supported
+2021-06-24 11:08:26,428 PyNaCl is not installed, voice will NOT be supported
+2021-06-24 11:09:34,741 PyNaCl is not installed, voice will NOT be supported
+2021-06-24 11:10:24,575 PyNaCl is not installed, voice will NOT be supported
+2021-06-24 11:12:44,626 PyNaCl is not installed, voice will NOT be supported
+2021-06-24 11:13:58,851 PyNaCl is not installed, voice will NOT be supported
+2021-06-24 11:14:55,270 PyNaCl is not installed, voice will NOT be supported
+2021-06-24 11:15:34,265 Converting to "int" failed for parameter "num".
+2021-06-24 11:16:37,593 Converting to "int" failed for parameter "num".
+2021-06-24 11:16:43,508 Role 'Bot Builder' is required to run this command.
+2021-06-24 11:17:29,449 PyNaCl is not installed, voice will NOT be supported
+2021-06-24 11:17:53,195 Converting to "int" failed for parameter "num".
+2021-06-24 11:17:55,208 Command "strieks" is not found
+2021-06-24 11:18:56,494 Converting to "int" failed for parameter "num".
+2021-06-24 11:19:57,041 PyNaCl is not installed, voice will NOT be supported
+2021-06-24 11:20:32,959 Command raised an exception: ValueError: invalid literal for int() with base 10: '0.1'
+2021-06-24 11:24:36,924 PyNaCl is not installed, voice will NOT be supported
+2021-06-24 11:26:59,417 Command "strieks" is not found

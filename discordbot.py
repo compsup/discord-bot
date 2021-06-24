@@ -12,7 +12,7 @@ modules["swear"] = True
 modules["lol"] = True
 devmode = False
 bad_words = []
-users = {}
+userstrikes = {}
 # Compsup 2021
 logging.basicConfig(filename="logfile.log", format='%(asctime)s %(message)s', filemode='a')
 logger=logging.getLogger()
@@ -34,14 +34,14 @@ async def on_ready():
     # await bot.change_presence(status=discord.Status.online, activity=discord.Activity(type=discord.ActivityType.watching, name='Messages'))
     logger.info("Ready!")
 
-async def user_strike_manager(message, users):
+async def user_strike_manager(message, userstrikes):
     time = 600
     user = message.author.id
-    if user not in users:
-        users[user] = 1
+    if user not in userstrikes:
+        userstrikes[user] = 1
     else:
-        users[user] += 1
-        if users[user] >= 3:
+        userstrikes[user] += 1
+        if userstrikes[user] >= 3:
             logger.debug("User: " + str(message.author) + " has been muted due to maxing strikes")
             print("User: " + str(message.author) + " has maxed there strikes!")
             member = message.author
@@ -53,7 +53,7 @@ async def user_strike_manager(message, users):
             await member.remove_roles(role)
             embed = discord.Embed(title=f"Unmuted", description=f"You have been unmuted in {message.guild}", color=0x258E70)
             await member.send(embed=embed)
-            users[user] = 0
+            userstrikes[user] = 0
             logger.debug("User: " + str(message.author) + " has been unmuted.")
 async def settings_manager(arg):
     global modules
@@ -136,7 +136,7 @@ async def on_message(message):
                 # Uses Better Profanity to check if the string contains 1 or more bad words.
                 if profanity.contains_profanity(message_content):
                     await message.delete()
-                    await user_strike_manager(message, users)
+                    await user_strike_manager(message, userstrikes)
     await counting(message)
     await bot.process_commands(message)
 
@@ -307,10 +307,21 @@ class Administrator(commands.Cog):
     @commands.command()
     async def strikes(self, ctx):
         user = ctx.author.id
-        if user in users:
-            await ctx.channel.send("You have " + str(users[user]) + " strikes.")
+        if user in userstrikes:
+            await ctx.channel.send("You have " + str(userstrikes[user]) + " strikes.")
         else:
             await ctx.channel.send("You don't have any strikes!")
+    @commands.command()
+    @commands.has_role('Bot Builder')
+    async def setstrikes(self, ctx, user : discord.Member, num):
+        global userstrikes
+        user = user.id
+        if user in userstrikes:
+            userstrikes[user] = float(num)
+        else:
+            userstrikes[user] = float(num)
+
+        
     @commands.command()
     @commands.has_any_role('Admin', 'Bot Builder')
     async def createreactionroles(self, ctx):
