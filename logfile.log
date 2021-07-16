@@ -98,3 +98,15 @@
 2021-06-24 11:20:32,959 Command raised an exception: ValueError: invalid literal for int() with base 10: '0.1'
 2021-06-24 11:24:36,924 PyNaCl is not installed, voice will NOT be supported
 2021-06-24 11:26:59,417 Command "strieks" is not found
+2021-07-16 19:27:38,404 arg is a required argument that is missing.
+2021-07-16 19:28:47,634 arg is a required argument that is missing.
+2021-07-16 19:29:27,202 Command "test" is not found
+2021-07-16 19:29:49,202 shutdowncodes file was not created, creating...
+2021-07-16 19:32:39,360 shutdowncodes file was not created, creating...
+2021-07-16 19:33:48,010 shutdowncodes file was not created, creating...
+2021-07-16 19:36:08,412 shutdowncodes file was not created, creating...
+2021-07-16 19:38:07,947 ! Admin Shutdown the bot !
+2021-07-16 19:40:30,113 ! compsup2#5005 Shutdown the bot !
+2021-07-16 19:42:28,907 ! compsup2#5005 Shutdown the bot !
+2021-07-16 19:42:42,572 ! compsup2#5005 Shutdown the bot !
+2021-07-16 19:43:06,839 ! compsup2#5005 Shutdown the bot !

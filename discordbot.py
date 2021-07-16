@@ -5,6 +5,7 @@ import json
 import re
 import logging
 from better_profanity import profanity
+import sys
 import datetime
 global modules
 modules = {}
@@ -304,6 +305,22 @@ class Administrator(commands.Cog):
             modules[arg] = True
             await ctx.channel.send(f"{arg} has been started.")
             await settings_manager("save")
+    @commands.command()
+    @commands.has_any_role('Admin', 'Bot Builder')
+    async def shutdown(self, ctx, arg):
+        arg = str(arg)
+        try:
+            with open('shutdowncodes.txt', 'r') as f:
+                content = f.readlines()
+        except:
+            with open('shutdowncodes.txt', 'w') as f:
+                logger.warning("shutdowncodes file was not created, creating...")
+        if arg in content:
+            print("Shutting down...")
+            logger.warning(f"! {ctx.message.author} Shutdown the bot !")
+            sys.exit()
+
+        
     @commands.command()
     async def strikes(self, ctx):
         user = ctx.author.id
