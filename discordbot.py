@@ -318,6 +318,12 @@ class Administrator(commands.Cog):
         if arg in content:
             print("Shutting down...")
             logger.warning(f"! {ctx.message.author} Shutdown the bot !")
+            await ctx.channel.send(f"! Emergency Shutdown Initated !")
+            global modules
+            await ctx.channel.send(f"Shutting Down Modules:")
+            modules["swear"] = False
+            await ctx.channel.send(f"Swear Module Deactivated")
+            await ctx.channel.send(f"System Shutting down...")
             sys.exit()
 
         
