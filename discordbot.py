@@ -325,6 +325,8 @@ class Administrator(commands.Cog):
             await ctx.channel.send(f"Swear Module Deactivated")
             await ctx.channel.send(f"System Shutting down...")
             sys.exit()
+        else:
+            logger.warning(f"User tried to shutdown bot with incorrect password[{content}]")
 
         
     @commands.command()
