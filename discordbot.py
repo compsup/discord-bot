@@ -154,7 +154,7 @@ async def on_member_update(before, after):
         guild = bot.get_guild(744594255456239636)
         member = guild.get_member(after.id)
         if profanity.contains_profanity(after.nick):
-            await member.edit(nick="Moderator Changed")
+            await member.edit(nick="")
             await member.send("You username contains profanity and has been changed!")
             logger.debug(f"{member.name} made there nickname a bad word and has been changed.")
 async def roles(ctx):
@@ -239,9 +239,6 @@ class Moderation(commands.Cog):
         await member.add_roles(muterole)
         embed = discord.Embed(title=f"{member}", description=f"has been muted from text and voice for {int(time)} seconds", color=0xFF5733)
         msg = await ctx.channel.send(embed=embed)
-        await msg.add_reaction("🇾")
-        await msg.add_reaction("🇪")
-        await msg.add_reaction("🇸")
         await asyncio.sleep(int(time))
         await member.remove_roles(muterole)
     @commands.command()
@@ -363,7 +360,7 @@ class Administrator(commands.Cog):
     async def devmode(self, ctx):
         '''
         Enables devmod
-
+        
         Devmode makes it so all features work on everyone.
         '''
         global devmode
