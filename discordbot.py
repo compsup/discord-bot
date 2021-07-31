@@ -136,7 +136,7 @@ async def on_message(message):
         logger.debug("Swear triggered")
         Admin = discord.utils.get(message.guild.roles, name="Admin")
         bot_builder = discord.utils.get(message.guild.roles, name="Bot Builder")
-        # Exempt og_squad and bot builder
+        # Exempt Admin and bot builder
         if not Admin in message.author.roles or devmode:
             if not bot_builder in message.author.roles or devmode:
                 # Uses Better Profanity to check if the string contains 1 or more bad words.
@@ -152,7 +152,7 @@ async def on_member_update(before, after):
         guild = bot.get_guild(744594255456239636)
         member = guild.get_member(after.id)
         if profanity.contains_profanity(after.nick):
-            await member.edit(nick="")
+            await member.edit(nick=None)
             await member.send("You username contains profanity and has been changed!")
             logger.debug(f"{member.name} made there nickname a bad word and has been changed.")
 async def roles(ctx):
@@ -290,6 +290,8 @@ class Fun(commands.Cog):
                 poll_upthumb = emoji.count
             elif str(emoji) == "👎":
                 poll_downthumb = emoji.count
+
+        # To correct for the bot reacting
         poll_upthumb -= 1
         poll_downthumb -= 1
         embed = discord.Embed(title=f'Poll Results', description=f"{question}\n\nYes: {poll_upthumb}\n No: {poll_downthumb}", color=0x002abf)
@@ -403,9 +405,14 @@ async def on_command_error(ctx, error):
         await ctx.send("You don't have the permissions to do that!")
     else:
         logger.error(error)
-with open("token.txt", "r") as file:
-    token = file.read()
 bot.add_cog(Moderation(bot))
 bot.add_cog(Fun(bot))
 bot.add_cog(Administrator(bot))
+
+try:
+    with open("token.txt", "r") as file:
+        token = file.read()
+except FileNotFoundError:
+    print("Critical Error: No token file found! Please create a file called 'token.txt' in the same folder the bot is being run and put a discord bot token inside.")
+    sys.exit()
 bot.run(token)
