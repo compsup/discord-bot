@@ -16,7 +16,6 @@ import sys
 global modules
 modules = {}
 modules["swear"] = True
-modules["lol"] = True
 devmode = False
 userstrikes = {}
 # Compsup 2021
@@ -124,10 +123,6 @@ async def on_message(message):
     # Ignore empty messages like photos
     if message_content == "":
         return
-    if modules["lol"]:
-        if message_content == "lol" and str(message.author.id) == "756569562677510175" or devmode:
-            await message.channel.send('All hail TurtleDude!')
-            logger.debug(f"Lol triggered")
     # Don't trigger on the bots messages
     if message.author == bot.user:
         return
