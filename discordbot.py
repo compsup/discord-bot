@@ -345,7 +345,7 @@ class Administrator(commands.Cog):
             modules["swear"] = False
             await ctx.channel.send(f"Swear Module Deactivated")
             await ctx.channel.send(f"System Shutting down...")
-            sys.exit()
+            raise SystemExit
         else:
             await ctx.channel.send("Incorrect Password! This incident will be reported to the system admins.")
             logger.warning(f"User tried to shutdown the bot with incorrect password[{content}]")
@@ -433,5 +433,5 @@ try:
         token = file.read()
 except FileNotFoundError:
     print("Critical Error: No token file found! Please create a file called 'token.txt' in the same folder the bot is being run and put a discord bot token inside.")
-    sys.exit()
+    raise SystemExit
 bot.run(token)
