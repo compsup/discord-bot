@@ -10,11 +10,9 @@ import discord
 from discord.ext import commands
 import asyncio
 import json
-import re
 import logging
 from better_profanity import profanity
 import sys
-import datetime
 global modules
 modules = {}
 modules["swear"] = True
@@ -360,7 +358,7 @@ class Administrator(commands.Cog):
     async def devmode(self, ctx):
         '''
         Enables devmod
-        
+
         Devmode makes it so all features work on everyone.
         '''
         global devmode
