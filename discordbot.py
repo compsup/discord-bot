@@ -80,6 +80,17 @@ async def settings_manager(arg):
                 data = json.dumps(modules, indent=4)
                 file.write(data)
                 logger.debug("Created settings.json and saved.")
+async def incident_report(ctx, message : str):
+    logger.warning(f"Incident Report: {message}")
+    admins = {
+        "compsup": 703423921860509698,
+        "XTheMoose": 621069526615720008,
+        "TomBomb": 549048335961686026,
+    }
+    for x in admins:
+        user = bot.get_user(int(admins[x]))
+        await user.send(f"Incident Report: {message}")
+
 async def counting(message):
      if str(message.channel.id) == "766025171038896128":
         # Check if the string is numeric
@@ -306,6 +317,17 @@ class Administrator(commands.Cog):
             await settings_manager("save")
     @commands.command()
     @commands.has_any_role('Admin', 'Bot Builder')
+    async def stealthmode(self, ctx, arg : str):
+        '''
+        Makes the bot turn invisible
+        Usage: ?stealthmode <enable/disable>
+        '''
+        if arg == "enable":
+            await bot.change_presence(status=discord.Status.offline)
+        if arg == "disable":
+            await bot.change_presence(status=discord.Status.online)
+    @commands.command()
+    @commands.has_any_role('Admin', 'Bot Builder')
     async def shutdown(self, ctx, arg):
         arg = str(arg)
         try:
@@ -325,7 +347,9 @@ class Administrator(commands.Cog):
             await ctx.channel.send(f"System Shutting down...")
             sys.exit()
         else:
-            logger.warning(f"User tried to shutdown bot with incorrect password[{content}]")
+            await ctx.channel.send("Incorrect Password! This incident will be reported to the system admins.")
+            logger.warning(f"User tried to shutdown the bot with incorrect password[{content}]")
+            await incident_report(ctx, f"Attempted bot shutdown by {ctx.message.author}, invalid password.")
 
         
     @commands.command()
