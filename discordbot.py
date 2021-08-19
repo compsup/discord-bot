@@ -90,7 +90,7 @@ async def incident_report(ctx, message : str):
     embed = discord.Embed(title=f'Incident Report', description=message, color=0xFF0000)
     for x in admins:
         user = bot.get_user(int(admins[x]))
-        await ctx.channel.send(embed=embed)
+        await user.send(embed=embed)
 
 async def counting(message):
      if str(message.channel.id) == "766025171038896128":
