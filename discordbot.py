@@ -87,9 +87,10 @@ async def incident_report(ctx, message : str):
         "XTheMoose": 621069526615720008,
         "TomBomb": 549048335961686026,
     }
+    embed = discord.Embed(title=f'Incident Report', description=message, color=0xFF0000)
     for x in admins:
         user = bot.get_user(int(admins[x]))
-        await user.send(f"Incident Report: {message}")
+        await ctx.channel.send(embed=embed)
 
 async def counting(message):
      if str(message.channel.id) == "766025171038896128":
@@ -340,14 +341,12 @@ class Administrator(commands.Cog):
             print("Shutting down...")
             logger.warning(f"! {ctx.message.author} Shutdown the bot !")
             await ctx.channel.send(f"! Emergency Shutdown Initated !")
-            global modules
             await ctx.channel.send(f"Shutting Down Modules:")
-            modules["swear"] = False
-            await ctx.channel.send(f"Swear Module Deactivated")
             await ctx.channel.send(f"System Shutting down...")
             raise SystemExit
         else:
-            await ctx.channel.send("Incorrect Password! This incident will be reported to the system admins.")
+            embed = discord.Embed(title=f'Incident Warning', description=f"Incorrect Password. This incident will be reported.", color=0xFF0000)
+            await ctx.channel.send(embed=embed)
             logger.warning(f"User tried to shutdown the bot with incorrect password[{content}]")
             await incident_report(ctx, f"Attempted bot shutdown by {ctx.message.author}, invalid password.")
 
@@ -432,6 +431,6 @@ try:
     with open("token.txt", "r") as file:
         token = file.read()
 except FileNotFoundError:
-    print("Critical Error: No token file found! Please create a file called 'token.txt' in the same folder the bot is being run and put a discord bot token inside.")
+    print("Critical Error: No token file found! Please put a token into 'token.txt': https://discord.com/developers/applications")
     raise SystemExit
 bot.run(token)
