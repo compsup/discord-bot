@@ -15,6 +15,11 @@ from better_profanity import profanity
 import sys
 global modules
 global raidmode
+global settings
+settings = {
+    "version": "1.2.8"
+}
+version = "1.2.9"
 raidmode = False
 modules = {}
 modules["swear"] = True
@@ -30,17 +35,42 @@ intents = discord.Intents().all()
 bot = commands.Bot(command_prefix='?', intents=intents)
 @bot.event
 async def on_ready():
+    await module_manager("load")
     await settings_manager("load")
-
+    if settings["version"] != version:
+        logger.info(f'Bot Updated from {settings["version"]} to {version}')
+        print(f'Bot Updated from {settings["version"]} to {version}')
+        settings["version"] = version
+        await settings_manager("save")
     print('Logged in as')
     print(bot.user.name)
     print(bot.user.id)
     print('------')
     print("Connected to: " + str(len(bot.guilds)) + " servers!")
     print('------')
-    # await bot.change_presence(status=discord.Status.online, activity=discord.Activity(type=discord.ActivityType.watching, name='Messages'))
+    await bot.change_presence(status=discord.Status.online, activity=discord.Activity(type=discord.ActivityType.watching, name=f'Version: {str(settings["version"])}'))
     logger.info("Ready!")
 
+async def settings_manager(arg):
+    global settings
+    if arg == "save":
+        logger.debug("Saving Settings")
+        with open("settings.json", "w") as file:
+            data = json.dumps(settings, indent=4)
+            file.write(data)
+    if arg == "load":
+        # Try reading, if it fails try creating the file.
+        try:
+            with open("settings.json", "r") as file:
+                data = file.read()
+                settings = json.loads(data)
+                logger.debug("Loaded Settings")
+        except:
+            logger.warn("Reading failed, trying to create settings.json.")
+            with open("settings.json", "w") as file:
+                data = json.dumps(settings, indent=4)
+                file.write(data)
+                logger.debug("Created settings.json and saved.")
 async def user_strike_manager(message, userstrikes):
     time = 600
     user = message.author.id
@@ -62,26 +92,26 @@ async def user_strike_manager(message, userstrikes):
             await member.send(embed=embed)
             userstrikes[user] = 0
             logger.debug("User: " + str(message.author) + " has been unmuted.")
-async def settings_manager(arg):
+async def module_manager(arg):
     global modules
     if arg == "save":
         logger.debug("Saving Settings")
-        with open("settings.json", "w") as file:
+        with open("modules.json", "w") as file:
             data = json.dumps(modules, indent=4)
             file.write(data)
     if arg == "load":
         # Try reading, if it fails try creating the file.
         try:
-            with open("settings.json", "r") as file:
+            with open("modules.json", "r") as file:
                 data = file.read()
                 modules = json.loads(data)
                 logger.debug("Loaded Settings")
         except:
-            logger.warn("Reading failed, trying to create settings.json.")
-            with open("settings.json", "w") as file:
+            logger.warn("Reading failed, trying to create modules.json.")
+            with open("modules.json", "w") as file:
                 data = json.dumps(modules, indent=4)
                 file.write(data)
-                logger.debug("Created settings.json and saved.")
+                logger.debug("Created modules.json and saved.")
 async def incident_report(ctx, message : str):
     logger.warning(f"Incident Report: {message}")
     admins = {
@@ -222,7 +252,7 @@ async def on_raw_reaction_remove(payload):
 
 @bot.event
 async def on_member_join(member):
-    if raidmode:
+    if settings["raidmode"]:
         await member.kick(reason="Server in lockdown mode!")
 @bot.command()
 async def ping(ctx):
@@ -321,16 +351,18 @@ class Administrator(commands.Cog):
         if arg in modules:
             modules[arg] = True
             await ctx.channel.send(f"{arg} has been started.")
-            await settings_manager("save")
+            await module_manager("save")
     @commands.command()
     @commands.has_any_role('Admin', 'Bot Builder')
     async def raidmode(self, ctx, arg):
         global raidmode
         if arg == "enable":
-            raidmode = True
+            settings["raidmode"] = True
+            await settings_manager("save")
             await ctx.channel.send("Raid mode enabled")
         elif arg == "disable":
-            raidmode = False
+            settings["raidmode"] = False
+            await settings_manager("save")
             await ctx.channel.send("Raid mode disabled")
     @commands.command()
     @commands.has_any_role('Admin', 'Bot Builder')
@@ -424,7 +456,7 @@ class Administrator(commands.Cog):
         if arg in modules:
             modules[arg] = False
             await ctx.channel.send(f"{arg} has been stopped.")
-            await settings_manager("save")
+            await module_manager("save")
 
 @bot.event
 async def on_command_error(ctx, error):
