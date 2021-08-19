@@ -14,6 +14,8 @@ import logging
 from better_profanity import profanity
 import sys
 global modules
+global raidmode
+raidmode = False
 modules = {}
 modules["swear"] = True
 devmode = False
@@ -217,7 +219,11 @@ async def on_raw_reaction_remove(payload):
         elif emoji == '👻':
             mrole = discord.utils.get(guild.roles, name='Phasmophobia Party')
             await member.remove_roles(mrole)
-    
+
+@bot.event
+async def on_member_join(member):
+    if raidmode:
+        await member.kick(reason="Server in lockdown mode!")
 @bot.command()
 async def ping(ctx):
     await ctx.send("pong!")
@@ -316,6 +322,16 @@ class Administrator(commands.Cog):
             modules[arg] = True
             await ctx.channel.send(f"{arg} has been started.")
             await settings_manager("save")
+    @commands.command()
+    @commands.has_any_role('Admin', 'Bot Builder')
+    async def raidmode(self, ctx, arg):
+        global raidmode
+        if arg == "enable":
+            raidmode = True
+            await ctx.channel.send("Raid mode enabled")
+        elif arg == "disable":
+            raidmode = False
+            await ctx.channel.send("Raid mode disabled")
     @commands.command()
     @commands.has_any_role('Admin', 'Bot Builder')
     async def stealthmode(self, ctx, arg : str):
