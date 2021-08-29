@@ -1,5 +1,1 @@
 29/8/2021 - 1.2.10: Added a changelog system and command
-
-30/8/2021 - 1.2.10: Added a changelog system and command
-
-31/8/2021 - 1.2.10: Added a changelog system and command
