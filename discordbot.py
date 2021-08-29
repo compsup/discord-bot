@@ -17,9 +17,10 @@ global modules
 global raidmode
 global settings
 settings = {
-    "version": "1.2.8"
+    "version": "1.2.9",
+    "logging-level": "warn",
 }
-version = "1.2.9"
+version = "1.2.10"
 raidmode = False
 modules = {}
 modules["swear"] = True
@@ -37,11 +38,25 @@ bot = commands.Bot(command_prefix='?', intents=intents)
 async def on_ready():
     await module_manager("load")
     await settings_manager("load")
+
+    if settings["logging-level"] == "debug":
+        logger.setLevel(logging.DEBUG)
+    elif settings["logging-level"] == "warn":
+        logger.setLevel(logging.WARN)
+    elif settings["logging-level"] == "critical":
+        logger.setLevel(logging.CRITICAL)
+    elif settings["logging-level"] == "error":
+        logger.setLevel(logging.ERROR)
+    elif settings["logging-level"] == "info":
+        logger.setLevel(logging.INFO)
+
+    # Check for update
     if settings["version"] != version:
         logger.info(f'Bot Updated from {settings["version"]} to {version}')
         print(f'Bot Updated from {settings["version"]} to {version}')
         settings["version"] = version
         await settings_manager("save")
+
     print('Logged in as')
     print(bot.user.name)
     print(bot.user.id)
@@ -352,6 +367,25 @@ class Administrator(commands.Cog):
             modules[arg] = True
             await ctx.channel.send(f"{arg} has been started.")
             await module_manager("save")
+    @commands.command()
+    async def changelog(self, ctx):
+        try:
+            with open('changelog.txt', 'r') as f:
+                content = f.read()
+                if content == "":
+                    await ctx.channel.send("No changelog available")
+                else:
+                    await ctx.channel.send(content)
+        except Exception as e:
+            print(e)
+            with open('changelog.txt', 'w') as f:
+                logger.info("Created changelog.txt")
+            with open('changelog.txt', 'r') as f:
+                content = f.read()
+                if content == "":
+                    await ctx.channel.send("No changelog available")
+                else:
+                    await ctx.channel.send(content)
     @commands.command()
     @commands.has_any_role('Admin', 'Bot Builder')
     async def raidmode(self, ctx, arg):
