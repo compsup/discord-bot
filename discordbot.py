@@ -12,32 +12,56 @@ import asyncio
 import json
 import logging
 from better_profanity import profanity
-import sys
+import os
+import random
+import string
+version = "1.2.11"
 global modules
-global raidmode
 global settings
+
+letters = string.ascii_lowercase
+
 settings = {
-    "version": "1.2.9",
+    "version": "1.2.11",
     "logging-level": "warn",
+    "raidmode": False,
+    "shutdowncode": f"{''.join(random.choice(letters) for i in range(32))}",
 }
-version = "1.2.10"
-raidmode = False
-modules = {}
-modules["swear"] = True
+modules = {
+    "swear": True,
+    "goodboy": True,
+}
+
 devmode = False
 userstrikes = {}
-# Compsup 2021
+# Logging
 logging.basicConfig(filename="logfile.log", format='%(asctime)s %(message)s', filemode='a')
 logger=logging.getLogger()
 logger.setLevel(logging.WARN)
 # Retrive all the badwords
 profanity.load_censor_words_from_file("swearwords.txt")
+
 intents = discord.Intents().all()
 bot = commands.Bot(command_prefix='?', intents=intents)
+
+
+async def updater():
+    # Check for update
+    if settings["version"] != version:
+        logger.info(f'Bot Updated from {settings["version"]} to {version}')
+        print(f'Bot Updated from {settings["version"]} to {version}')
+        settings["version"] = version
+
+        ###################
+        # Custom code to run per update
+        ###################
+        await settings_manager("save")
+
 @bot.event
 async def on_ready():
     await module_manager("load")
     await settings_manager("load")
+    await updater()
 
     if settings["logging-level"] == "debug":
         logger.setLevel(logging.DEBUG)
@@ -49,13 +73,6 @@ async def on_ready():
         logger.setLevel(logging.ERROR)
     elif settings["logging-level"] == "info":
         logger.setLevel(logging.INFO)
-
-    # Check for update
-    if settings["version"] != version:
-        logger.info(f'Bot Updated from {settings["version"]} to {version}')
-        print(f'Bot Updated from {settings["version"]} to {version}')
-        settings["version"] = version
-        await settings_manager("save")
 
     print('Logged in as')
     print(bot.user.name)
@@ -81,7 +98,7 @@ async def settings_manager(arg):
                 settings = json.loads(data)
                 logger.debug("Loaded Settings")
         except:
-            logger.warn("Reading failed, trying to create settings.json.")
+            logger.warning("Reading failed, trying to create settings.json.")
             with open("settings.json", "w") as file:
                 data = json.dumps(settings, indent=4)
                 file.write(data)
@@ -122,13 +139,13 @@ async def module_manager(arg):
                 modules = json.loads(data)
                 logger.debug("Loaded Settings")
         except:
-            logger.warn("Reading failed, trying to create modules.json.")
+            logger.warning("Reading failed, trying to create modules.json.")
             with open("modules.json", "w") as file:
                 data = json.dumps(modules, indent=4)
                 file.write(data)
                 logger.debug("Created modules.json and saved.")
 async def incident_report(ctx, message : str):
-    logger.warning(f"Incident Report: {message}")
+    logger.warninging(f"Incident Report: {message}")
     admins = {
         "compsup": 703423921860509698,
         "XTheMoose": 621069526615720008,
@@ -389,7 +406,6 @@ class Administrator(commands.Cog):
     @commands.command()
     @commands.has_any_role('Admin', 'Bot Builder')
     async def raidmode(self, ctx, arg):
-        global raidmode
         if arg == "enable":
             settings["raidmode"] = True
             await settings_manager("save")
@@ -413,15 +429,10 @@ class Administrator(commands.Cog):
     @commands.has_any_role('Admin', 'Bot Builder')
     async def shutdown(self, ctx, arg):
         arg = str(arg)
-        try:
-            with open('shutdowncodes.txt', 'r') as f:
-                content = f.readlines()
-        except:
-            with open('shutdowncodes.txt', 'w') as f:
-                logger.warning("shutdowncodes file was not created, creating...")
+        content = str(settings['shutdowncode'])
         if arg in content:
             print("Shutting down...")
-            logger.warning(f"! {ctx.message.author} Shutdown the bot !")
+            logger.warninging(f"! {ctx.message.author} Shutdown the bot !")
             await ctx.channel.send(f"! Emergency Shutdown Initated !")
             await ctx.channel.send(f"Shutting Down Modules:")
             await ctx.channel.send(f"System Shutting down...")
@@ -429,7 +440,7 @@ class Administrator(commands.Cog):
         else:
             embed = discord.Embed(title=f'Incident Warning', description=f"Incorrect Password. This incident will be reported.", color=0xFF0000)
             await ctx.channel.send(embed=embed)
-            logger.warning(f"User tried to shutdown the bot with incorrect password[{content}]")
+            logger.warninging(f"User tried to shutdown the bot with incorrect password[{content}]")
             await incident_report(ctx, f"Attempted bot shutdown by {ctx.message.author}, invalid password.")
 
         

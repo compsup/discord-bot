@@ -1,3 +1,5 @@
-token.txt
-logfile.log
-shutdowncodes.txt
+!changelog.txt
+!discordbot.py
+!README.md
+!swearwords.txt
+*
