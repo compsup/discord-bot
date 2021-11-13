@@ -19,13 +19,13 @@ version = "1.2.11"
 global modules
 global settings
 
-letters = string.ascii_lowercase
+# Default config options
 
 settings = {
     "version": "1.2.11",
     "logging-level": "warn",
     "raidmode": False,
-    "shutdowncode": f"{''.join(random.choice(letters) for i in range(32))}",
+    "shutdowncode": f"{''.join(random.choice(string.ascii_lowercase) for i in range(32))}",
 }
 modules = {
     "swear": True,
@@ -88,14 +88,12 @@ async def settings_manager(arg):
     if arg == "save":
         logger.debug("Saving Settings")
         with open("settings.json", "w") as file:
-            data = json.dumps(settings, indent=4)
-            file.write(data)
-    if arg == "load":
+            file.write(json.dumps(settings, indent=4))
+    elif arg == "load":
         # Try reading, if it fails try creating the file.
         try:
             with open("settings.json", "r") as file:
-                data = file.read()
-                settings = json.loads(data)
+                settings = json.load(file)
                 logger.debug("Loaded Settings")
         except:
             logger.warning("Reading failed, trying to create settings.json.")
@@ -103,6 +101,10 @@ async def settings_manager(arg):
                 data = json.dumps(settings, indent=4)
                 file.write(data)
                 logger.debug("Created settings.json and saved.")
+    else:
+        # Why, just why. Please do this right. Whats hard about passing a proper arg?
+        logger.error("Improper arg passed in settings manager")
+        pass
 async def user_strike_manager(message, userstrikes):
     time = 600
     user = message.author.id
@@ -332,15 +334,7 @@ class Fun(commands.Cog):
         self.bot = bot
     @commands.command()
     async def pog(self, ctx):
-        not_pog = discord.utils.get(ctx.guild.roles, name="Not Poggers")
-        pog = discord.utils.get(ctx.guild.roles, name="POGGERS")
-        kinda_pog = discord.utils.get(ctx.guild.roles, name="Kinda Pog")
-        if pog in ctx.author.roles:
-            await ctx.send("Your very pog!")
-        elif not_pog in ctx.author.roles:
-            await ctx.send("Doesn't look like your very pog.")
-        elif kinda_pog in ctx.author.roles:
-            await ctx.send("Your kinda pog")
+        await ctx.send("Bark- You are as stupid as a dog.")
 
     @commands.command()
     async def goodboy(self, ctx):
