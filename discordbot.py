@@ -37,7 +37,7 @@ userstrikes = {}
 # Logging
 logging.basicConfig(filename="logfile.log", format='%(asctime)s %(message)s', filemode='a')
 logger=logging.getLogger()
-logger.setLevel(logging.WARN)
+logger.setLevel(logging.DEBUG)
 # Retrive all the badwords
 profanity.load_censor_words_from_file("swearwords.txt")
 
@@ -214,8 +214,10 @@ async def on_message(message):
             if not bot_builder in message.author.roles or devmode:
                 # Uses Better Profanity to check if the string contains 1 or more bad words.
                 if profanity.contains_profanity(message_content):
+                    logger.debug(f'{message.author} said a bad word: {message_content}')
+                    print("here")
                     await message.delete()
-                    await user_strike_manager(message, userstrikes)
+                    #await user_strike_manager(message, userstrikes)
     await counting(message)
     await bot.process_commands(message)
 
@@ -316,6 +318,16 @@ class Moderation(commands.Cog):
         msg = await ctx.channel.send(embed=embed)
         await asyncio.sleep(int(time))
         await member.remove_roles(muterole)
+    @commands.command()
+    @commands.has_any_role('Admin', 'Bot Builder')
+    async def mute(self, ctx, member : discord.Member, time):
+        '''
+        mutes a user
+        '''
+        muterole = discord.utils.get(member.guild.roles, name="BAD BAD")
+        await member.add_roles(muterole)
+        embed = discord.Embed(title=f"{member}", description=f"has been muted from text and voice for infinite seconds", color=0xFF5733)
+        msg = await ctx.channel.send(embed=embed)
     @commands.command()
     @commands.has_any_role('Admin', 'Bot Builder')
     async def unmute(self, ctx, member : discord.Member):
